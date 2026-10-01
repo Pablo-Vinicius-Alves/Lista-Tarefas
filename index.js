@@ -30,13 +30,56 @@ class GerenciadorTarefas {
                 throw new Error(`Ainda não está concluido ${e}`);
             }
         });
-        return result;
+        return result.concluida = true;
+    }
+
+    tarefasDisponiveis() {
+        const disponiveis = [];
+
+        for (const [nome, tarefa] of this.tarefas) {
+            const concluidas = tarefa.dependecias.every(dep => {
+                const dependecias = this.tarefas.get(dep);
+                return dependecias.concluida
+            })
+            if (tarefa.concluida === true) {
+                continue;
+            }
+
+            if (concluidas) {
+                disponiveis.push(nome);
+            }
+        }
+        return disponiveis;
     }
 
 }
-
 const projeto = new GerenciadorTarefas();
-projeto.adicionarTarefa("Fundação", []);
-projeto.adicionarTarefa("Paredes", ["Fundação"]);
+projeto.adicionarTarefa("fundacao", []);
+projeto.adicionarTarefa("paredes", ["fundacao"]);
+projeto.adicionarTarefa("telhado", ["paredes"]);
 
-console.log(projeto.tarefas.get("Paredes"));
+console.log(projeto.tarefasDisponiveis());
+
+projeto.concluirTarefa("fundacao");
+console.log(projeto.tarefasDisponiveis());
+
+// projeto.concluirTarefa("fundacao");
+// console.log(projeto.tarefas.get("fundacao"));
+// // esperado: { dependecias: [], concluida: true }
+
+// console.log(projeto.tarefas.get("paredes"));
+// esperado: { dependecias: ["fundacao"], concluida: false }
+// const projeto = new GerenciadorTarefas();
+// projeto.adicionarTarefa("fundação", []);
+// projeto.adicionarTarefa("paredes", ["fundação"]);
+
+// try {
+//     projeto.concluirTarefa("paredes");
+// } catch (e) {
+//     console.log("Erro esperado:", e.message);
+// }
+
+// projeto.concluirTarefa("fundação");
+// projeto.concluirTarefa("paredes");
+
+// console.log(projeto.tarefas.get("paredes"));
